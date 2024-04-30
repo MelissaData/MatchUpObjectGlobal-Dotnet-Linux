@@ -12,39 +12,49 @@ NC='\033[0m' # No Color
 
 globalFile=""
 usFile=""
+dataPath=""
 license=""
 quiet="false"
 
 while [ $# -gt 0 ] ; do
   case $1 in
-    -g | --global) 
+    --global) 
         globalFile="$2"
 
-        if [ "$globalFile" == "-u" ] || [ "$globalFile" == "--us" ] || [ "$globalFile" == "-l" ] || [ "$globalFile" == "--license" ] || [ "$globalFile" == "-q" ] || [ "$globalFile" == "--quiet" ] || [ -z "$globalFile" ];
+        if [ "$globalFile" == "--us" ] || [ "$globalFile" == "--dataPath" ] || [ "$globalFile" == "--license" ] || [ "$globalFile" == "--quiet" ] || [ -z "$globalFile" ];
         then
             printf "${RED}Error: Missing an argument for parameter \'globalFile\'.${NC}\n"  
             exit 1
         fi  
         ;;
-	-u | --us) 
+    --us) 
         usFile="$2"
 
-        if [ "$usFile" == "-g" ] || [ "$usFile" == "--global" ] || [ "$usFile" == "-l" ] || [ "$usFile" == "--license" ] || [ "$usFile" == "-q" ] || [ "$usFile" == "--quiet" ] || [ -z "$usFile" ];
+        if [ "$usFile" == "--global" ] || [ "$usFile" == "--dataPath" ] || [ "$usFile" == "--license" ] || [ "$usFile" == "--quiet" ] || [ -z "$usFile" ];
         then
             printf "${RED}Error: Missing an argument for parameter \'global\'.${NC}\n"  
             exit 1
         fi  
         ;;	
-    -l | --license) 
+    --dataPath) 
+        dataPath="$2"
+        
+        if [ "$dataPath" == "--license" ] || [ "$dataPath" == "--quiet" ] || [ "$dataPath" == "--global" ] || [ "$dataPath" == "--us" ] || [ -z "$dataPath" ];
+        then
+            printf "${RED}Error: Missing an argument for parameter \'dataPath\'.${NC}\n"  
+            exit 1
+        fi  
+        ;;
+    --license) 
         license="$2"
 
-        if [ "$license" == "-o" ] || [ "$license" == "--origin" ] || [ "$license" == "-f" ] || [ "$license" == "--file" ] || [ "$license" == "-q" ] || [ "$license" == "--quiet" ] || [ -z "$license" ];
+        if [ "$license" == "--global" ] || [ "$license" == "--us" ] || [ "$license" == "--dataPath" ] || [ "$license" == "--quiet" ] || [ -z "$license" ];
         then
             printf "${RED}Error: Missing an argument for parameter \'license\'.${NC}\n"  
             exit 1
         fi    
         ;;
-    -q | --quiet) 
+    --quiet) 
         quiet="true" 
         ;;
   esac
@@ -53,24 +63,34 @@ done
 
 ######################### Config ###########################
 
-RELEASE_VERSION='2024.Q1'
+RELEASE_VERSION='2024.Q2'
 ProductName="GLOBAL_MU_DATA"
 
 # Uses the location of the .sh file 
-# Modify this if you want to use 
 CurrentPath=$(pwd)
 ProjectPath="$CurrentPath/MelissaMatchupObjectGlobalLinuxDotnet"
-BuildPath="$ProjectPath/Build"
-DataPath="$ProjectPath/Data"
 
-if [ ! -d $DataPath ];
+BuildPath="$ProjectPath/Build"
+if [ ! -d "$BuildPath" ];
 then
-    mkdir $DataPath
+    mkdir "$BuildPath"
 fi
 
-if [ ! -d $BuildPath ];
+if [ -z "$dataPath" ];
 then
-    mkdir $BuildPath
+    DataPath="$ProjectPath/Data"
+else
+    DataPath=$dataPath
+fi
+
+if [ ! -d "$DataPath" ] && [ "$DataPath" == "$ProjectPath/Data" ];
+then
+    mkdir "$DataPath"
+elif [ ! -d "$DataPath" ] && [ "$DataPath" != "$ProjectPath/Data" ];
+then
+    printf "\nData file path does not exist. Please check that your file path is correct.\n"
+    printf "\nAborting program, see above.\n"
+    exit 1
 fi
 
 # Config variables for download file(s)
@@ -218,18 +238,25 @@ then
     exit 1
 fi
 
+# Get data file path (either from parameters or user input)
+if [ "$DataPath" = "$ProjectPath/Data" ]; then
+    printf "Please enter your data files path directory if you have already downloaded the release zip.\nOtherwise, the data files will be downloaded using the Melissa Updater (Enter to skip): "
+    read dataPathInput
+
+    if [ ! -z "$dataPathInput" ]; then  
+        if [ ! -d "$dataPathInput" ]; then  
+            printf "\nData file path does not exist. Please check that your file path is correct.\n"
+            printf "\nAborting program, see above.\n"
+            exit 1
+        else
+            DataPath=$dataPathInput
+        fi
+    fi
+fi
+
 # Use Melissa Updater to download data file(s) 
 # Download data file(s) 
-DownloadDataFiles $license      # comment out this line if using DQS Release
-
-# Set data file(s) path
-#DataPath=""      # uncomment this line and change to your DQS Release data file(s) directory 
-
-#if [ ! -d $DataPath ]; # uncomment this section of code if you are using your own DQS Release data file(s) directory
-#then
-    #printf "\nData path is invalid!\n"
-    #exit 1
-#fi
+DownloadDataFiles $license # Comment out this line if using own release
 
 # Download SO(s)
 DownloadSO $license 
