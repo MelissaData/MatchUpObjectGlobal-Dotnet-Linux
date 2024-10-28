@@ -21,7 +21,7 @@ And return
 
 ## Tested Environments
 - Linux 64-bit .NET 7.0, Ubuntu 20.04.05 LTS
-- Melissa data files for 2024-Q3
+- Melissa data files for 2024-Q4
 
 ## Required File(s) and Programs
 
@@ -73,8 +73,8 @@ Once all of this is done, you should be able to verify that the SDK is installed
 
 #### Download this project
 ```
-$ git clone https://github.com/MelissaData/MatchUpObjectGlobal-Dotnet-Linux
-$ cd MatchUpObjectGlobal-Dotnet-Linux
+git clone https://github.com/MelissaData/MatchUpObjectGlobal-Dotnet-Linux
+cd MatchUpObjectGlobal-Dotnet-Linux
 ```
 
 #### Set up Melissa Updater 
@@ -132,23 +132,23 @@ Parameters:
 
   The script will prompt the user for a global txt file and a US txt file, then use the provided txt files to test MatchUp Object Global.  For example:
     ```
-    $ ./MelissaMatchupObjectGlobalLinuxDotnet.sh
+    ./MelissaMatchupObjectGlobalLinuxDotnet.sh
     ```
     For quiet mode:
     ```
-    $ ./MelissaMatchupObjectGlobalLinuxDotnet.sh --quiet
+    ./MelissaMatchupObjectGlobalLinuxDotnet.sh --quiet
     ```
 - Command Line 
 
   You can pass a global txt file, US txt file, and a license string into the `--global`, `--us`, and `--license` parameters respectively to test MatchUp Object Global. For example:
     ```
-    $ ./MelissaMatchupObjectGlobalLinuxDotnet.sh --global "MelissaMatchupGlobalSampleInput.txt" --us "MelissaMatchupUSSampleInput.txt"
-    $ ./MelissaMatchupObjectGlobalLinuxDotnet.sh --global "MelissaMatchupGlobalSampleInput.txt" --us "MelissaMatchupUSSampleInput.txt" --license "<your_license_string>"
+    ./MelissaMatchupObjectGlobalLinuxDotnet.sh --global "MelissaMatchupGlobalSampleInput.txt" --us "MelissaMatchupUSSampleInput.txt"
+    ./MelissaMatchupObjectGlobalLinuxDotnet.sh --global "MelissaMatchupGlobalSampleInput.txt" --us "MelissaMatchupUSSampleInput.txt" --license "<your_license_string>"
     ```
   For quiet mode:
     ```
-    $ ./MelissaMatchupObjectGlobalLinuxDotnet.sh --global "MelissaMatchupGlobalSampleInput.txt" --us "MelissaMatchupUSSampleInput.txt" --quiet
-    $ ./MelissaMatchupObjectGlobalLinuxDotnet.sh --global "MelissaMatchupGlobalSampleInput.txt" --us "MelissaMatchupUSSampleInput.txt" --license "<your_license_string>" --quiet
+    ./MelissaMatchupObjectGlobalLinuxDotnet.sh --global "MelissaMatchupGlobalSampleInput.txt" --us "MelissaMatchupUSSampleInput.txt" --quiet
+    ./MelissaMatchupObjectGlobalLinuxDotnet.sh --global "MelissaMatchupGlobalSampleInput.txt" --us "MelissaMatchupUSSampleInput.txt" --license "<your_license_string>" --quiet
     ```
 This is the expected output from a successful setup for interactive mode:
 
