@@ -1,7 +1,37 @@
 #!/bin/bash
 
-# Name:    MelissaMatchUpObjectGlobalLinuxDotnet
-# Purpose: Use the MelissaUpdater to make the MelissaMatchUpObjectGlobalLinuxDotnet code usable
+# MelissaMatchupObjectGlobalLinuxDotnet
+#
+# Downloads the required components and then builds and runs MelissaMatchupObjectGlobalLinuxDotnet.
+#
+# This script uses the Melissa Updater to fetch the data file(s), the shared object(s), and the
+# C# wrapper, verifies the shared object(s) downloaded, then builds the .NET project and runs it
+# against the supplied input files.
+#
+# Overall flow:
+#   1. Read parameters / prompt for the license and data path.
+#   2. Download data file(s), the shared object(s), and the wrapper via the Melissa Updater.
+#   3. Confirm the shared object(s) are present.
+#   4. Build the project, then run it (supplied input files or interactive).
+#
+# Options:
+#   --global <value>    Path to the Global input file to deduplicate.
+#   --us <value>        Path to the U.S. input file to deduplicate.
+#   --dataPath <value>  Path to an existing data files directory. If omitted, the script
+#                       prompts for a path; pressing Enter at that prompt skips it and
+#                       downloads the data files into the project's Data folder via the
+#                       Melissa Updater. A path that does not exist aborts the script.
+#   --license <value>   License string. Resolved in this order:
+#                         1. This option.
+#                         2. An interactive prompt, if the option was not supplied.
+#                         3. The MD_LICENSE environment variable, if the prompt was left blank.
+#                       Note that the environment variable is the last resort, not the first:
+#                       running without --license always prompts, even when MD_LICENSE is set.
+#   --quiet             Suppresses the Melissa Updater console output during downloads.
+#
+# Examples:
+#   ./MelissaMatchupObjectGlobalLinuxDotnet.sh --license "your-license"
+#   ./MelissaMatchupObjectGlobalLinuxDotnet.sh --global "MelissaMatchupGlobalSampleInput.txt" --us "MelissaMatchupUSSampleInput.txt" --license "your-license"
 
 ######################### Constants ##########################
 
@@ -63,7 +93,8 @@ done
 
 ######################### Config ###########################
 
-RELEASE_VERSION='2026.Q2'
+# Product release the updater pulls files for
+RELEASE_VERSION='2026.Q3'
 ProductName="GLOBAL_MU_DATA"
 
 # Uses the location of the .sh file 
@@ -93,7 +124,7 @@ then
     exit 1
 fi
 
-# Config variables for download file(s)
+# Binary/shared object(s) needed to run the example
 Config1_FileName="libmdMatchup.so"
 Config1_ReleaseVersion=$RELEASE_VERSION
 Config1_OS="LINUX"
@@ -108,6 +139,7 @@ Config2_Compiler="GCC48"
 Config2_Architecture="64BIT"
 Config2_Type="BINARY"
 
+# C# wrapper source that exposes the shared object(s) to the .NET project
 Wrapper_FileName="mdMatchup_cSharpCode.cs"
 Wrapper_ReleaseVersion=$RELEASE_VERSION
 Wrapper_OS="ANY"
@@ -117,6 +149,7 @@ Wrapper_Type="INTERFACE"
 
 ######################## Functions #########################
 
+# Download the product data file(s) into $DataPath via the Melissa Updater.
 DownloadDataFiles()
 {
     printf "\n============================== MELISSA UPDATER ============================\n"
@@ -133,6 +166,7 @@ DownloadDataFiles()
     printf "Melissa Updater finished downloading data file(s)!\n"
 }
 
+# Download the shared object(s) into the Build folder.
 DownloadSO() 
 {
     printf "\nMELISSA UPDATER IS DOWNLOADING SO(S)...\n"
@@ -178,6 +212,7 @@ DownloadSO()
     fi
 }
 
+# Download the C# wrapper source into the project folder.
 DownloadWrapper() 
 {
     printf "\nMELISSA UPDATER IS DOWNLOADING WRAPPER(S)...\n"
@@ -203,6 +238,7 @@ DownloadWrapper()
     printf "Melissa Updater finished downloading $Wrapper_FileName!\n"
 }
 
+# Verify the expected shared object(s) landed in the Build folder
 CheckSOs() 
 {
     if [ ! -f $BuildPath/$Config1_FileName ];
@@ -283,9 +319,10 @@ printf "\nAll file(s) have been downloaded/updated!\n"
 # Build project
 printf "\n=============================== BUILD PROJECT =============================\n"
 
-dotnet publish -f="net8.0" -c Release -o $BuildPath MelissaMatchupObjectGlobalLinuxDotnet/MelissaMatchupObjectGlobalLinuxDotnet.csproj
+dotnet publish -f="net10.0" -c Release -o $BuildPath MelissaMatchupObjectGlobalLinuxDotnet/MelissaMatchupObjectGlobalLinuxDotnet.csproj
 
 # Run Project
+# No input file supplied -> run interactively; otherwise pass the input files in.
 if [ -z "$globalFile" ] && [ -z "$usFile" ];
 then
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./Build
